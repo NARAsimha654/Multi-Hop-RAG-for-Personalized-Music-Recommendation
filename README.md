@@ -24,20 +24,6 @@ The system retrieves relevant song metadata, lyrics, and user preferences before
 
 ---
 
-## 🛠️ Tech Stack
-
-| Category             | Technology Used                    |
-| -------------------- | ---------------------------------- |
-| Programming Language | Python 3.x                         |
-| Model Frameworks     | PyTorch, Hugging Face Transformers |
-| Retrieval Methods    | FAISS (Dense), BM25 (Sparse)       |
-| Backend              | FastAPI                            |
-| Deployment           | Docker (Optional)                  |
-| Data Processing      | Pandas, NumPy                      |
-| Visualization        | Matplotlib, Jupyter Notebooks      |
-
----
-
 ## 🎯 Novel Enhancements
 
 ### 🔹 1. Multi-Hop Graph-Based Retrieval (Graph + RAG Hybrid)
@@ -112,17 +98,6 @@ The system retrieves relevant song metadata, lyrics, and user preferences before
 
 - Recommended songs/playlists are sent to the **Spotify API for playback**.
 - User can **modify preferences dynamically**.
-
-## ⏳ 1.5-Month Implementation Plan
-
-| **Week**   | **Task**                                            |
-| ---------- | --------------------------------------------------- |
-| **Week 1** | Set up Spotify API, retrieve user listening history |
-| **Week 2** | Implement **Graph-Based Retrieval (GNN + Neo4j)**   |
-| **Week 3** | Integrate **FAISS + BM25 Hybrid Retrieval**         |
-| **Week 4** | Fine-tune **RAG for Music**                         |
-| **Week 5** | Build **Conversational AI (LangChain + GPT)**       |
-| **Week 6** | Test & Deploy via FastAPI/Spring Boot               |
 
 ## 🔗 Related GitHub Projects for Reference
 
