@@ -171,9 +171,3 @@ This project implements a Retrieval-Augmented Generation (RAG) model to provide 
 - [ ] Submit to **AI/ML conferences** (e.g., **NeurIPS, ICASSP, ACM RecSys**).
 
 ---
-
-## **✅ Final Adjustments**
-
-✔ **Reproducible** (Data versioning, tracking).<br>
-✔ **Scalable** (Handles dynamic graph updates).<br>
-✔ **Research-Oriented** (Ablation studies, baseline comparison).<br>
