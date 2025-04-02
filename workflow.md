@@ -174,6 +174,6 @@ This project implements a Retrieval-Augmented Generation (RAG) model to provide 
 
 ## **✅ Final Adjustments**
 
-✔ **Reproducible** (Data versioning, tracking).
-✔ **Scalable** (Handles dynamic graph updates).
-✔ **Research-Oriented** (Ablation studies, baseline comparison).
+✔ **Reproducible** (Data versioning, tracking).<br>
+✔ **Scalable** (Handles dynamic graph updates).<br>
+✔ **Research-Oriented** (Ablation studies, baseline comparison).<br>
