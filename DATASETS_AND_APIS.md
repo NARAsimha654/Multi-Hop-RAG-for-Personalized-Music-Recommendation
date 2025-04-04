@@ -90,6 +90,20 @@ This project utilizes a rich collection of music-related datasets and APIs to su
 
 ---
 
+## 🧰 Other Tools (For future stages)
+
+### 1. Neo4j: Knowledge graph storage and querying
+
+### 2. FAISS: Dense vector similarity search
+
+### 3. BM25 (rank_bm25): Sparse keyword-based retrieval
+
+### 4. Hugging Face Transformers: RAG and transformer fine-tuning
+
+### 5. LangChain: Conversational AI layer
+
+---
+
 ## 📌 Summary Table
 
 | Dataset/API          | Purpose                           | Source / Access              |
