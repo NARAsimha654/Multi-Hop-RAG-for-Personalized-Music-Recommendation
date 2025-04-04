@@ -151,7 +151,7 @@ music-rag-recommender/<br>
 &emsp;│&emsp;&emsp;└── config.yaml<br>
 <br>
 &emsp;├── 📄 workflow.md &emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;&nbsp;&nbsp; Full end-to-end workflow steps ✅<br>
-&emsp;├── 📄 datasets_and_tools.md &emsp;&nbsp; What we made earlier 📦<br>
+&emsp;├── 📄 datasets_and_tools.md &emsp;&nbsp; Description with links of all the datasets and APIs used in this project 📦<br>
 &emsp;├── 📄 README.md &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;&nbsp; Overview of the project<br>
 &emsp;├── 📄 requirements.txt &emsp;&emsp;&emsp;&nbsp;&nbsp;&nbsp; All required pip packages<br>
 &emsp;├── 📄 .gitignore &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;&nbsp; Ignore large data/models<br>
