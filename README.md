@@ -115,3 +115,46 @@ The system retrieves relevant song metadata, lyrics, and user preferences before
 | **Hybrid Retrieval (FAISS + BM25)**          | ⚠️ Some systems use embeddings (FAISS), but not multi-hop | ✅ Uses **FAISS + BM25 + Graph Retrieval**         |
 | **Conversational AI for Dynamic Refinement** | ❌ No dynamic chat-based music recommendations            | ✅ **Refines recommendations via AI chatbot**      |
 | **Emotion-Based Music Retrieval**            | ❌ No explicit emotion detection in text queries          | ✅ **Uses sentiment analysis for recommendations** |
+
+## Structre of the GitHub Repository
+
+music-rag-recommender/
+│
+├── 📁 data/ # Local/processed data (can use .gitignore)
+│ ├── raw/ # Raw input datasets (MSD, MPD, GTZAN, etc.)
+│ ├── processed/ # Cleaned/structured CSVs/DataFrames
+│ └── external/ # Outputs from APIs (e.g., Genius, Last.fm)
+│
+├── 📁 notebooks/ # Jupyter notebooks for exploration
+│ ├── 01_preprocessing.ipynb
+│ ├── 02_graph_construction.ipynb
+│ ├── 03_gnn_training.ipynb
+│ └── 04_rag_pipeline.ipynb
+│
+├── 📁 src/ # Python modules for reusable code
+│ ├── data_loader.py # Load & preprocess datasets
+│ ├── feature_engineering.py # Create embeddings, extract features
+│ ├── graph_builder.py # Knowledge graph construction
+│ ├── retrieval.py # Dense + Sparse retrieval functions (FAISS, BM25)
+│ ├── sentiment_analysis.py # Emotion-aware processing (VADER, NRC, etc.)
+│ └── rag_pipeline.py # Final RAG-based pipeline
+│
+├── 📁 models/ # Saved models (GNN, RAG, etc.)
+│ └── gnn_model.pt
+│
+├── 📁 evaluation/ # Scripts to evaluate recommendation performance
+│ └── metrics.py
+│
+├── 📁 api/ # Backend API files (FastAPI, etc.)
+│ └── main.py
+│
+├── 📁 config/ # Config files for paths, hyperparams, etc.
+│ └── config.yaml
+│
+├── 📄 workflow.md # Full end-to-end workflow steps ✅
+├── 📄 datasets_and_tools.md # What we made earlier 📦
+├── 📄 README.md # Overview of the project
+├── 📄 requirements.txt # All required pip packages
+├── 📄 .gitignore # Ignore large data/models
+└── 📄 LICENSE
+s
