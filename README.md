@@ -118,42 +118,41 @@ The system retrieves relevant song metadata, lyrics, and user preferences before
 
 # 📁 Project Directory Structure: Music RAG Recommender
 
-music-rag-recommender/
-│
-├── data/  
-│ ├── raw/ # Raw input datasets (MSD, MPD, GTZAN, etc.)
-│ ├── processed/ # Cleaned/structured CSVs/DataFrames
-│ └── external/ # Outputs from APIs (e.g., Genius, Last.fm)
-│
-├── notebooks/  
-│ ├── 01_preprocessing.ipynb
-│ ├── 02_graph_construction.ipynb
-│ ├── 03_gnn_training.ipynb
-│ └── 04_rag_pipeline.ipynb
-│
-├── src/  
-│ ├── data_loader.py # Load & preprocess datasets
-│ ├── feature_engineering.py # Create embeddings, extract features
-│ ├── graph_builder.py # Knowledge graph construction
-│ ├── retrieval.py # Dense + Sparse retrieval (FAISS, BM25)
-│ ├── sentiment_analysis.py # Emotion-aware processing (VADER, NRC, etc.)
-│ └── rag_pipeline.py # Final RAG-based pipeline
-│
-├── models/  
-│ └── gnn_model.pt
-│
-├── evaluation/  
-│ └── metrics.py
-│
-├── api/  
-│ └── main.py
-│
-├── config/  
-│ └── config.yaml
-│
-├── workflow.md # Full end-to-end workflow steps ✅
-├── datasets_and_tools.md # Tools & datasets used 📦
-├── README.md # Overview of the project
-├── requirements.txt # Required pip packages
-├── .gitignore # Ignore large data/models
-└── LICENSE
+music-rag-recommender/<br>
+&emsp;├── 📁 data/ &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;<!-- Local/processed data --> Local/processed data (can use .gitignore)<br>
+&emsp;│&emsp;&emsp;├── raw/ &emsp;&emsp;&emsp;&emsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Raw input datasets (MSD, MPD, GTZAN, etc.)<br>
+&emsp;│&emsp;&emsp;├── processed/ &emsp;&emsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Cleaned/structured CSVs/DataFrames<br>
+&emsp;│&emsp;&emsp;└── external/ &emsp;&emsp;&emsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Outputs from APIs (e.g., Genius, Last.fm)<br>
+<br>
+&emsp;├── 📁 notebooks/ &emsp;&emsp;&emsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Jupyter notebooks for exploration<br>
+&emsp;│&emsp;&emsp;├── 01_preprocessing.ipynb<br>
+&emsp;│&emsp;&emsp;├── 02_graph_construction.ipynb<br>
+&emsp;│&emsp;&emsp;├── 03_gnn_training.ipynb<br>
+&emsp;│&emsp;&emsp;└── 04_rag_pipeline.ipynb<br>
+<br>
+&emsp;├── 📁 src/ &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Python modules for reusable code<br>
+&emsp;│&emsp;&emsp;├── data_loader.py &emsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Load & preprocess datasets<br>
+&emsp;│&emsp;&emsp;├── feature_engineering.py &nbsp;&nbsp;&nbsp; Create embeddings, extract features<br>
+&emsp;│&emsp;&emsp;├── graph_builder.py &emsp;&emsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Knowledge graph construction<br>
+&emsp;│&emsp;&emsp;├── retrieval.py &emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Dense + Sparse retrieval (FAISS, BM25)<br>
+&emsp;│&emsp;&emsp;├── sentiment_analysis.py &emsp;&nbsp;&nbsp;&nbsp;&nbsp; Emotion-aware processing (VADER, NRC, etc.)<br>
+&emsp;│&emsp;&emsp;└── rag_pipeline.py &emsp;&emsp;&emsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Final RAG-based pipeline<br>
+<br>
+&emsp;├── 📁 models/ &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Saved models (GNN, RAG, etc.)<br>
+&emsp;│&emsp;&emsp;└── gnn_model.pt<br>
+<br>
+&emsp;├── 📁 evaluation/ &emsp;&emsp;&emsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Scripts to evaluate recommendation performance<br>
+&emsp;│&emsp;&emsp;└── metrics.py<br>
+<br>
+&emsp;├── 📁 api/ &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;&nbsp;&nbsp;&nbsp; Backend API files (FastAPI, etc.)<br>
+&emsp;│&emsp;&emsp;└── main.py<br>
+<br>
+&emsp;├── 📁 config/ &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Config files for paths, hyperparams, etc.<br>
+&emsp;│&emsp;&emsp;└── config.yaml<br>
+<br>
+&emsp;├── 📄 workflow.md &emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;&nbsp;&nbsp; Full end-to-end workflow steps ✅<br>
+&emsp;├── 📄 datasets_and_tools.md &emsp;&nbsp; What we made earlier 📦<br>
+&emsp;├── 📄 README.md &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;&nbsp; Overview of the project<br>
+&emsp;├── 📄 requirements.txt &emsp;&emsp;&emsp;&nbsp;&nbsp;&nbsp; All required pip packages<br>
+&emsp;├── 📄 .gitignore &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;&nbsp; Ignore large data/models<br>
+&emsp;└── 📄 LICENSE<br>
