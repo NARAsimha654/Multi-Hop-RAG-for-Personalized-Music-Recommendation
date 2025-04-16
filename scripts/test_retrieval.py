@@ -114,9 +114,9 @@ def search_similar_tracks(query_text, top_k=5):
 # --- Example Usage ---
 
 # Example queries:
-query1 = "Queen - Bohemian Rhapsody"
-query2 = "relaxing acoustic guitar music"
-query3 = "upbeat electronic dance track"
+query1 = "The Weeknd - Blinding Lights"
+query2 = "chill R&B songs"
+query3 = "Martin Garrix songs"
 
 results1 = search_similar_tracks(query1, top_k=5)
 if results1:
