@@ -41,7 +41,7 @@ except Exception as e:
 # --- Fetch Lyrics ---
 lyrics_results = []
 # !!! START WITH A SMALL SAMPLE !!!
-sample_size = 20 # Increase gradually after testing
+sample_size = 100 # Increase gradually after testing
 print(f"Fetching lyrics for a sample of {sample_size} tracks...")
 
 processed_count = 0
