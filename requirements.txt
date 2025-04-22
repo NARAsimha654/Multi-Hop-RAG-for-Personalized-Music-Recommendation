@@ -1,6 +1,3 @@
-torch==2.1.0
-transformers==4.36.0
-faiss-cpu==1.7.4
 sentence-transformers==2.2.2
 fastapi==0.110.0
 uvicorn==0.29.0
@@ -11,3 +8,33 @@ scikit-learn==1.3.2
 datasets==2.14.5
 jupyter==1.0.0
 matplotlib==3.8.2
+
+# Core Data Handling
+pandas
+numpy
+h5py         # For reading Million Song Dataset HDF5 files
+pyarrow      # Recommended for reading/writing Parquet files with pandas
+
+# Neo4j Database Interaction
+neo4j
+
+# Text Embeddings & Dense Retrieval
+sentence-transformers
+faiss-cpu    # For FAISS similarity search (CPU version)
+faiss-gpu  # OR use this if you have a GPU with CUDA installed
+
+# Sparse Retrieval (Lyrics Search)
+rank_bm25
+
+# Lyrics Fetching
+lyricsgenius
+tqdm         # For progress bars
+
+# RAG Generator Model (Hugging Face Transformers)
+transformers
+
+# Choose ONE backend for transformers (PyTorch is common)
+torch
+# tensorflow # OR use this backend
+
+# Note: Built-in libraries like os, sys, time, re, json, pickle are not listed here.
