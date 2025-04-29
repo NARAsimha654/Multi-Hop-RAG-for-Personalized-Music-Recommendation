@@ -6,23 +6,32 @@ import pickle
 import re
 import pandas as pd
 import time
-from operator import itemgetter # <-- ADD THIS IMPORT
 import sys
 from sentence_transformers import SentenceTransformer
 from rank_bm25 import BM25Okapi # Or the specific BM25 class you used
 from tqdm.auto import tqdm # Progress bar (optional for loading)
+from operator import itemgetter
 
 # --- LangChain specific imports ---
 from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder # Import MessagesPlaceholder
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda, RunnableParallel
 from langchain_core.output_parsers import StrOutputParser
-from langchain.memory import ConversationBufferMemory # Import memory
+from langchain.memory import ConversationBufferMemory
 
 # --- Transformers imports for local pipeline ---
-from transformers import pipeline, T5Tokenizer, T5ForConditionalGeneration
+from transformers import pipeline # Removed T5Tokenizer, T5ForConditionalGeneration as pipeline handles it
+
+# --- Neo4j Import ---
+from neo4j import GraphDatabase
 
 # --- Configuration ---
+# Neo4j Connection Details
+NEO4J_URI = "bolt://localhost:7687"
+NEO4J_USER = "neo4j"
+NEO4J_PASSWORD = "Narasimha123" # <<<--- VERIFY YOUR PASSWORD
+DB_NAME = "db-1"
+
 # Paths to indices and maps
 INDEX_DIR_FAISS = 'C:\\Narasimha\\KLETU Related\\6th Semester Related\\GenAI and NLP\\GenAI\\Course Project\\GitHub Repo\\Multi-Hop-RAG-for-Personalized-Music-Recommendation\\data\\processed\\faiss_indices\\'
 MPD_FAISS_INDEX_FILE = os.path.join(INDEX_DIR_FAISS, 'mpd_text_index.faiss')
@@ -39,11 +48,22 @@ MPD_TRACKS_FILE = r'C:\Narasimha\KLETU Related\6th Semester Related\GenAI and NL
 # Path to Emotion Features
 EMOTION_FEATURES_FILE = r'C:\Narasimha\KLETU Related\6th Semester Related\GenAI and NLP\GenAI\Course Project\GitHub Repo\Multi-Hop-RAG-for-Personalized-Music-Recommendation\data\processed\mpd_emotion_features_sample_vad.parquet'
 
-# --- Local LLM Configuration ---
+# Local LLM Configuration
 LOCAL_LLM_MODEL_NAME = "google/flan-t5-base"
 
 # RRF Configuration
 RRF_K_CONST = 60
+
+# --- Neo4j Driver Setup ---
+neo4j_driver = None
+print(f"Attempting to connect to Neo4j at {NEO4J_URI}...")
+try:
+    neo4j_driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
+    neo4j_driver.verify_connectivity()
+    print("Neo4j connection successful!")
+except Exception as e:
+    print(f"Warning: Error connecting to Neo4j: {e}. Graph context retrieval will be skipped.")
+    # Don't exit, allow script to run without graph context if connection fails
 
 # --- Load All Retrieval Components ---
 print("--- Loading Retrieval Components ---")
@@ -86,10 +106,9 @@ except FileNotFoundError as fnf_error: print(f"Error loading file: {fnf_error}")
 except Exception as e: print(f"Error loading components: {e}"); sys.exit(1)
 
 
-# --- Helper Functions (Define BEFORE use in Chain) ---
+# --- Helper Functions ---
 
 def tokenize_query(text):
-    """ Basic tokenizer for BM25 query """
     processed = text.lower(); processed = re.sub(r'[^\w\s]', '', processed); return processed.split()
 
 def hybrid_search_rrf(query_text, top_k_dense=50, top_k_sparse=50, rerank_k=10, rrf_k_const=60):
@@ -127,27 +146,80 @@ def hybrid_search_rrf(query_text, top_k_dense=50, top_k_sparse=50, rerank_k=10, 
         except ValueError: pass
         rrf_scores[uri] = score
     reranked_results = sorted(rrf_scores.items(), key=lambda item: item[1], reverse=True)
-    return [uri for uri, score in reranked_results[:rerank_k]] # Return only URIs
+    # Return only the URIs for the retriever function
+    return [uri for uri, score in reranked_results[:rerank_k]]
 
-def format_context_for_llm(retrieved_uris):
-    """ Formats retrieved URIs into a string with details and emotions. """
+# --- NEW: Function to get context from Neo4j ---
+def get_graph_context(tx, track_uris):
+    """ Queries Neo4j for related info about a list of track URIs """
+    if not track_uris:
+        return {} # Return empty dict if no URIs provided
+
+    # Query to find artists and co-occurring tracks for the input URIs
+    # OPTIONAL: Add genre, SAME_AS links etc. if needed
+    cypher_query = """
+    UNWIND $uris AS trackUri
+    MATCH (t:MpdTrack {track_uri: trackUri})
+    // Get Artist info (including MusicBrainz data if available)
+    OPTIONAL MATCH (t)-[:BY_ARTIST]->(a:Artist)
+    // Get Co-occurring tracks (limit to top N by count for context)
+    OPTIONAL MATCH (t)-[co:CO_OCCURS_WITH]-(co_t:MpdTrack)
+    WITH t, a, co_t, co.count AS co_count
+    ORDER BY co_count DESC
+    WITH t, a, collect({name: co_t.track_name, artist: co_t.artist_name, count: co_count})[..3] AS top_cooccurring // Limit to top 3 co-occurring
+    // Collect results per input track URI
+    RETURN t.track_uri AS input_uri,
+           a.name AS artist_name,
+           a.artistType AS artist_type,
+           a.country AS artist_country,
+           top_cooccurring
+    """
+    results = tx.run(cypher_query, parameters={'uris': track_uris})
+    # Structure the results into a dictionary: {input_uri: {details}}
+    graph_context_map = {}
+    for record in results:
+        graph_context_map[record["input_uri"]] = {
+            "artist_name": record["artist_name"],
+            "artist_type": record["artist_type"],
+            "artist_country": record["artist_country"],
+            "cooccurring": record["top_cooccurring"] # List of dicts
+        }
+    return graph_context_map
+
+# --- UPDATED: Function to Format Context for LLM ---
+def format_context_for_llm(retrieved_uris, graph_context_map):
+    """ Formats retrieved URIs into a string including graph context. """
     if not retrieved_uris: return "No relevant tracks found."
+
     context_parts = []
-    max_context_items = 5
+    max_context_items = 5 # Limit context length for the prompt
     for i, uri in enumerate(retrieved_uris[:max_context_items]):
         details = track_details_lookup.get(uri, ('Unknown Track', 'Unknown Artist'))
+        base_info = f"Track {i+1}: {details[1]} - {details[0]}" # Artist - Title
+
+        # Add Emotion Info
         emo_info = emotion_lookup.get(uri)
-        emotion_str = ""
         if emo_info:
             parts = []
-            vader_score = emo_info.get('vader_compound')
-            valence = emo_info.get('vad_valence')
-            arousal = emo_info.get('vad_arousal')
-            if vader_score is not None: parts.append(f"Sentiment:{vader_score:.2f}")
-            if valence is not None: parts.append(f"V:{valence:.2f}")
-            if arousal is not None: parts.append(f"A:{arousal:.2f}")
-            if parts: emotion_str = f" (Emotions: {', '.join(parts)})"
-        context_parts.append(f"Track {i+1}: {details[1]} - {details[0]}{emotion_str}")
+            vader = emo_info.get('vader_compound'); val = emo_info.get('vad_valence'); aro = emo_info.get('vad_arousal')
+            if vader is not None: parts.append(f"Sent:{vader:.2f}")
+            if val is not None: parts.append(f"V:{val:.2f}")
+            if aro is not None: parts.append(f"A:{aro:.2f}")
+            if parts: base_info += f" (Emotions: {', '.join(parts)})"
+
+        # Add Graph Context Info
+        graph_info = graph_context_map.get(uri)
+        if graph_info:
+            graph_parts = []
+            if graph_info.get('artist_type'): graph_parts.append(f"Type:{graph_info['artist_type']}")
+            if graph_info.get('artist_country'): graph_parts.append(f"Country:{graph_info['artist_country']}")
+            # Add top co-occurring track simplified
+            if graph_info.get('cooccurring') and len(graph_info['cooccurring']) > 0:
+                 co_track = graph_info['cooccurring'][0] # Get the top one
+                 graph_parts.append(f"Co-occurs with:{co_track.get('artist', '?')} - {co_track.get('name', '?')}")
+            if graph_parts: base_info += f" (Graph: {'; '.join(graph_parts)})"
+
+        context_parts.append(base_info)
     return ". ".join(context_parts)
 
 
@@ -163,37 +235,52 @@ try:
 except Exception as e:
      print(f"Error initializing local LLM pipeline: {e}"); sys.exit(1)
 
-# --- Initialize Conversation Memory ---
-# return_messages=True is important for chat models/prompts
+# Initialize Conversation Memory
 memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
-# Define the prompt template with placeholders for history and context
-# Using MessagesPlaceholder for chat history
+# Define the prompt template
 prompt_template = ChatPromptTemplate.from_messages([
-    ("system", "You are a helpful music recommender assistant. Answer the user's question based on the conversation history and the provided context tracks. If the context isn't sufficient, say so."),
-    MessagesPlaceholder(variable_name="chat_history"), # Where history messages go
-    ("human", "Context Tracks:\n{context}\n\nQuestion:\n{question}"), # Combine context and question for human turn
+    ("system", "You are a helpful music recommender assistant. Answer the user's question based on the conversation history and the provided context tracks (including their details like emotions or co-occurring songs). If the context isn't sufficient, say so."),
+    MessagesPlaceholder(variable_name="chat_history"),
+    ("human", "Context Tracks:\n{context}\n\nQuestion:\n{question}"),
 ])
 
-# Define the RAG chain components
-# Retriever runnable remains the same
+# --- Define the RAG chain with Graph Context Retrieval ---
+
+# 1. Retriever gets initial candidate URIs
 retriever_runnable = RunnableLambda(lambda x: hybrid_search_rrf(x['question']))
 
-# Runnable to load history (needed because memory isn't directly part of the input dict)
-load_memory = RunnableLambda(memory.load_memory_variables) | itemgetter("chat_history")
+# 2. Function to fetch graph context using Neo4j driver
+def fetch_graph_context_for_uris(uris):
+    if not neo4j_driver or not uris:
+        return {} # Return empty if no driver or no URIs
+    with neo4j_driver.session(database=DB_NAME) as session:
+        return session.execute_read(get_graph_context, uris)
 
-# Define the core RAG steps using RunnableParallel for clarity
-rag_steps = RunnableParallel(
-    # Pass question through, retrieve context, format context
-    {"context": retriever_runnable | RunnableLambda(format_context_for_llm),
-     "question": RunnablePassthrough(), # Pass original question dict through
-     "chat_history": load_memory # Load history here
-     }
-)
+# 3. Combine retrieved URIs and graph context before formatting
+def combine_context(inputs):
+    retrieved_uris = inputs['uris']
+    graph_context_map = inputs['graph_context']
+    return format_context_for_llm(retrieved_uris, graph_context_map)
 
-# Define the full chain
+# 4. Define the chain structure
 chain = (
-    rag_steps # Prepare context, question, and history
+    # Start with the input dictionary {"question": user_query}
+    RunnablePassthrough.assign(
+        uris=retriever_runnable # Run retriever first to get candidate URIs
+    )
+    | RunnablePassthrough.assign(
+        graph_context=(RunnableLambda(lambda x: x['uris']) | RunnableLambda(fetch_graph_context_for_uris)) # Fetch graph context based on URIs
+    )
+    | RunnablePassthrough.assign(
+        context=RunnableLambda(combine_context) # Format final context string using URIs and graph_context
+    )
+    | RunnableParallel( # Prepare final inputs for the prompt template
+        {"context": itemgetter("context"),
+         "question": itemgetter("question"),
+         "chat_history": RunnableLambda(memory.load_memory_variables) | itemgetter("chat_history")
+        }
+      )
     | prompt_template # Apply the prompt template
     | llm             # Call the local LLM pipeline
     | StrOutputParser() # Parse the output as a string
@@ -202,7 +289,7 @@ chain = (
 
 # --- Interactive Query Loop with Memory ---
 if __name__ == "__main__":
-    print("\n--- Interactive RAG Music Recommender (Local LLM + Memory) ---")
+    print("\n--- Interactive RAG Music Recommender (Local LLM + Memory + KG Context) ---")
     print(f"Using model: {LOCAL_LLM_MODEL_NAME}")
     print("Enter your music query (e.g., 'sad acoustic songs', 'artist - title')")
     print("Type 'quit' or 'exit' to stop.")
@@ -215,24 +302,23 @@ if __name__ == "__main__":
 
             print("Generating recommendation...")
             start_invoke_time = time.time()
-
-            # Prepare inputs for the chain (now includes the question)
-            inputs = {"question": user_query}
-
-            # Invoke the chain - it will internally use the memory
-            response = chain.invoke(inputs)
+            inputs = {"question": user_query} # Input for the chain
+            response = chain.invoke(inputs)   # Invoke the chain
             end_invoke_time = time.time()
 
-            # --- Save conversation context ---
-            # Manually save the human query and AI response to memory
+            # Save conversation context
             memory.save_context(inputs, {"output": response})
-            # print("\nMemory:", memory.load_memory_variables({})) # Optional: print memory state
 
             print(f"\n--- Recommendation ({end_invoke_time - start_invoke_time:.2f}s) ---")
-            print(response) # Print the final response from the LLM
+            print(response)
 
         except EOFError: print("\nExiting..."); break
         except KeyboardInterrupt: print("\nExiting..."); break
         except Exception as e: print(f"An error occurred during generation: {e}")
 
     print("\n--- Session Ended ---")
+    # Close Neo4j driver connection
+    if neo4j_driver:
+        neo4j_driver.close()
+        print("\nNeo4j driver closed.")
+
