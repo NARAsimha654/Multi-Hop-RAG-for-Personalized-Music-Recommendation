@@ -13,7 +13,7 @@ tqdm.pandas()
 
 # --- Configuration ---
 # Input file (the SMALL sample lyrics file you created earlier)
-LYRICS_SAMPLE_FILE = r'C:\Narasimha\KLETU Related\6th Semester Related\GenAI and NLP\GenAI\Course Project\GitHub Repo\Multi-Hop-RAG-for-Personalized-Music-Recommendation\data\processed\mpd_lyrics.parquet' # Adjust if you named it differently
+LYRICS_SAMPLE_FILE = r'C:\Narasimha\KLETU Related\6th Semester Related\GenAI and NLP\GenAI\Course Project\GitHub Repo\Multi-Hop-RAG-for-Personalized-Music-Recommendation\data\processed\mpd_lyrics_27k.parquet' # Adjust if you named it differently
 
 # --- IMPORTANT: Update this path to your NRC-VAD lexicon file ---
 NRC_VAD_LEXICON_FILE = r'C:\Narasimha\KLETU Related\6th Semester Related\GenAI and NLP\GenAI\Course Project\GitHub Repo\Multi-Hop-RAG-for-Personalized-Music-Recommendation\data\raw\NRC-VAD-Lexicon-v2.1\NRC-VAD-Lexicon-v2.1.txt' # <<<--- UPDATE THIS PATH

@@ -12,12 +12,12 @@ from rank_bm25 import BM25Okapi # Or BM25Plus, BM25L
 
 # --- Configuration ---
 # Input lyrics file
-LYRICS_FILE = 'C:\\Narasimha\\KLETU Related\\6th Semester Related\\GenAI and NLP\\GenAI\\Course Project\\GitHub Repo\\Multi-Hop-RAG-for-Personalized-Music-Recommendation\\data\\processed\\mpd_lyrics.parquet'
+LYRICS_FILE = 'C:\\Narasimha\\KLETU Related\\6th Semester Related\\GenAI and NLP\\GenAI\\Course Project\\GitHub Repo\\Multi-Hop-RAG-for-Personalized-Music-Recommendation\\data\\processed\\mpd_lyrics_27k.parquet'
 
 # Output directory for BM25 index and ID map
 INDEX_DIR = 'C:\\Narasimha\\KLETU Related\\6th Semester Related\\GenAI and NLP\\GenAI\\Course Project\\GitHub Repo\\Multi-Hop-RAG-for-Personalized-Music-Recommendation\\data\\processed\\bm25_indices\\'
-BM25_INDEX_FILE = os.path.join(INDEX_DIR, 'mpd_lyrics_bm25_index.pkl')
-BM25_ID_MAP_FILE = os.path.join(INDEX_DIR, 'mpd_lyrics_bm25_id_map.pkl')
+BM25_INDEX_FILE = os.path.join(INDEX_DIR, 'mpd_lyrics_bm25_index_27k.pkl')
+BM25_ID_MAP_FILE = os.path.join(INDEX_DIR, 'mpd_lyrics_bm25_id_map_27k.pkl')
 
 # Ensure output directory exists
 os.makedirs(INDEX_DIR, exist_ok=True)
