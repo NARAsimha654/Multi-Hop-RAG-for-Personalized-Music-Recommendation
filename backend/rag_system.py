@@ -54,9 +54,9 @@ class RAGConfig:
 
     # Neo4j Connection Details
     NEO4J_URI = "bolt://localhost:7687"
-    NEO4J_USER = "neo4j"
-    NEO4J_PASSWORD = "Narasimha123" # <<<--- VERIFY YOUR PASSWORD
-    DB_NAME = "db-1"
+    NEO4J_USER = ""
+    NEO4J_PASSWORD = "" # <<<--- VERIFY YOUR PASSWORD
+    DB_NAME = ""
 
 
 # --- RAG System Class ---
