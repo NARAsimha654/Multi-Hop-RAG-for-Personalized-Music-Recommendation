@@ -29,8 +29,8 @@ from neo4j import GraphDatabase
 # Neo4j Connection Details
 NEO4J_URI = "bolt://localhost:7687"
 NEO4J_USER = "neo4j"
-NEO4J_PASSWORD = "Narasimha123" # <<<--- VERIFY YOUR PASSWORD
-DB_NAME = "db-1"
+NEO4J_PASSWORD = "" # <<<--- VERIFY YOUR PASSWORD
+DB_NAME = ""
 
 # Paths to indices and maps
 INDEX_DIR_FAISS = 'C:\\Narasimha\\KLETU Related\\6th Semester Related\\GenAI and NLP\\GenAI\\Course Project\\GitHub Repo\\Multi-Hop-RAG-for-Personalized-Music-Recommendation\\data\\processed\\faiss_indices\\'
